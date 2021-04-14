@@ -23,7 +23,7 @@ export const Index = (props: any) => {
                 <Route exact path="/home/:tableName" component={() => {
                     const tableName = url.substring(1)
                     return <React.Fragment>
-                        {tableName == 'home' ? null :
+                        {tableName === 'home' ? null :
                             <View tableName={tableName} />
                         }</React.Fragment>
                 }

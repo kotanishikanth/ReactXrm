@@ -9,10 +9,22 @@ type ColumnMetadataType = {
 type TableMetadataType = {
     tableName: string
     displayName: string
-    columns: ColumnMetadataType[]
+    primaryColumnName?: string
+    columns: { [key: string]: ColumnMetadataType }
 }
+
+type TableFormMetadata = {
+
+}
+
+type TableViewMetadata = {
+
+}
+
 type MetadataType = {
-    tables: { [key: string]: TableMetadataType }
+    tables: { [key: string]: TableMetadataType },
+    forms: TableFormMetadata[],
+    views: TableViewMetadata[],
 }
 
 type DatabaseContextStateType = {
@@ -28,7 +40,7 @@ type DatabaseContextType = {
 const DatabaseContext = React.createContext<DatabaseContextType>({
 
     state: {
-        metadata: { tables: {} },
+        metadata: { tables: {}, forms: [], views:[] },
         data: []
     },
     setState: state => console.warn('setState prototype method')
@@ -43,12 +55,24 @@ export const UseMetadataServices = () => {
     }
 
     const GetTableList = () => {
-        return Object.values(state.metadata.tables).map((x:TableMetadataType) => {
+        return Object.values(state.metadata.tables).map((x: TableMetadataType) => {
             return {
                 tableName: x.tableName,
                 displayName: x.displayName
             }
         });
+    }
+
+    const GetTable = (tableName: string): TableMetadataType => {
+        var _table = state.metadata.tables[tableName]
+        if (_table) return _table
+        else throw new Error("Table " + tableName + " doesn't exist")
+    }
+
+    // eslint-disable-next-line
+    const TableExists = (tableName: string): boolean => {
+        if (state.metadata.tables[tableName]) return true
+        else return false
     }
 
     const AddNewTable = (table: any) => {
@@ -61,9 +85,43 @@ export const UseMetadataServices = () => {
         var _table: TableMetadataType = {
             "tableName": table["tableName"],
             "displayName": table["displayName"] || table["tableName"].replace(/^\w/, (c: string) => c.toUpperCase()),
-            "columns": [
-                { columnName: 'id', columnLabel: (table["displayName"] + ' ID'), columnType: 'number' }
-            ]
+            "columns": { 
+                id: { columnName: 'id', columnLabel: (table["displayName"] + ' ID'), columnType: 'number' }
+            }
+        }
+
+        setState((prev: DatabaseContextStateType) => {
+            return {
+                ...prev,
+                metadata: {
+                    ...prev.metadata,
+                    tables: { ...prev.metadata.tables, [table["tableName"]]: _table }
+                }
+            }
+        })
+    }
+
+    const GetColumnList = (tableName:string) => {
+        var _table = GetTable(tableName)
+        return Object.values(_table.columns).map((x: ColumnMetadataType) => {
+            return {
+                columnName: x.columnName,
+                columnLabel: x.columnLabel,
+                columnType: x.columnType
+            }
+        });
+    }
+
+    const UpdateTable = (table: any) => {
+
+        if (!table["tableName"]) throw new Error('TableName cannot be empty')
+
+        var _table: TableMetadataType = GetTable(table["tableName"])
+
+        _table= {
+            ..._table,
+            "tableName": table["tableName"],
+            "displayName": table["displayName"] || table["tableName"].replace(/^\w/, (c: string) => c.toUpperCase()),
         }
 
         setState((prev: DatabaseContextStateType) => {
@@ -98,15 +156,54 @@ export const UseMetadataServices = () => {
         else throw new Error('Table ' + tableName + ' doesnot exists')
     }
 
-    const AddNewColumn = (column: ColumnMetadataType) => {
+    const UpsertColumn = (tableName: string, column: ColumnMetadataType) => {
+        var _table = GetTable(tableName)
+        if(!column.columnName) throw new Error("Column name cannot be empty")
+        _table = {
+            ..._table,
+            columns: {..._table.columns, columnName: column}
+        }
+        setState((prev: DatabaseContextStateType) => {
+            return {
+                ...prev,
+                metadata: {
+                    ...prev.metadata,
+                    tables: { ...prev.metadata.tables, [tableName]: _table }
+                }
+            }
+        })
+    }
 
+    const DeleteColumn = (tableName: string, columnName: string) => {
+        var _table = GetTable(tableName)
+        if(! Object.keys(_table.columns).includes( columnName)) throw new Error("Column name " + columnName + " doesn't exists")
+        var _columns = _table.columns
+        delete _columns[columnName]
+        _table = {
+            ..._table,
+            columns: _columns
+        }
+        setState((prev: DatabaseContextStateType) => {
+            return {
+                ...prev,
+                metadata: {
+                    ...prev.metadata,
+                    tables: { ...prev.metadata.tables, [tableName]: _table }
+                }
+            }
+        })
     }
 
     return {
-        AddNewTable,
-        DeleteTable,
         GetAllTableNames,
-        GetTableList
+        GetTableList,
+        GetTable,
+        AddNewTable,
+        UpdateTable,
+        DeleteTable,
+        GetColumnList,
+        UpsertColumn,
+        DeleteColumn
     }
 }
 
@@ -115,14 +212,23 @@ const DatabaseContextProvider = ((props?: any) => {
     const [state, setState] = React.useState<DatabaseContextStateType>({
         metadata: {
             tables: {
+                'account': {
+                    tableName: 'account', displayName: 'Account', primaryColumnName:'name', columns: {
+                        id: { columnName: 'id', columnLabel: 'AccountId', columnType: 'number' },
+                        name: { columnName: 'name', columnLabel: 'Account Name', columnType: 'text' },
+                    }
+                },
                 'contact': {
-                    tableName: 'contact', displayName: 'Contact', columns: [
-                        { columnName: 'id', columnLabel: 'ContactId', columnType: 'number' },
-                        { columnName: 'firstname', columnLabel: 'First Name', columnType: 'text' },
-                        { columnName: 'lastname', columnLabel: 'Last Name', columnType: 'text' },
-                    ]
+                    tableName: 'contact', displayName: 'Contact', primaryColumnName:'fullname', columns: {
+                        id: { columnName: 'id', columnLabel: 'ContactId', columnType: 'number' },
+                        fullname: { columnName: 'fullname', columnLabel: 'First Name', columnType: 'text' },
+                        firstname: { columnName: 'firstname', columnLabel: 'First Name', columnType: 'text' },
+                        lastname: { columnName: 'lastname', columnLabel: 'Last Name', columnType: 'text' },
+                    }
                 }
-            }
+            },
+            forms: [],
+            views: []
         },
         data: {}
     });

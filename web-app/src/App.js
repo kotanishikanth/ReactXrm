@@ -1,7 +1,7 @@
 import './App.css';
 
 import { HashRouter as Router, Route, Link } from 'react-router-dom'
-import { Container, Row, Col, Nav, Navbar } from 'react-bootstrap'
+import { Row, Col, Nav, Navbar } from 'react-bootstrap'
 import DatabaseContextProvider from './contexts/database-context';
 
 import { Index as HomePage } from './components/home/Index'
