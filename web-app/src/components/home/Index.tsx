@@ -12,15 +12,15 @@ export const Index = (props: any) => {
         <Row style={{ height: '100%' }}>
             <Col style={{ backgroundColor: 'white' }} sm={2}>
                 <ListGroup>
-                    <ListGroup.Item><Link to="/account">Account</Link></ListGroup.Item>
-                    <ListGroup.Item><Link to="/contact">Contact</Link></ListGroup.Item>
+                    <ListGroup.Item><Link to="/home/account">Account</Link></ListGroup.Item>
+                    <ListGroup.Item><Link to="/home/contact">Contact</Link></ListGroup.Item>
                 </ListGroup>
             </Col>
             <Col sm={10}>
                 <Route exact path="/home">
                     <h3>HomePage</h3>
                 </Route>
-                <Route exact path="/:tableName" component={() => {
+                <Route exact path="/home/:tableName" component={() => {
                     const tableName = url.substring(1)
                     return <React.Fragment>
                         {tableName == 'home' ? null :

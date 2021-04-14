@@ -23,7 +23,7 @@ function App() {
             </Col>
           </Row>
 
-          <Route exact path="/*">
+          <Route path="/home">
             <HomePage />
           </Route>
           <Route path="/settings">
