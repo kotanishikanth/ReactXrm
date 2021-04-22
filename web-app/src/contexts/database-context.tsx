@@ -6,7 +6,7 @@ type ColumnMetadataType = {
     columnType: 'text' | 'number' | 'lookup' | 'datetime'
 }
 
-type TableMetadataType = {
+export type TableMetadataType = {
     tableName: string
     displayName: string
     primaryColumnName?: string
@@ -221,7 +221,7 @@ const DatabaseContextProvider = ((props?: any) => {
                 'contact': {
                     tableName: 'contact', displayName: 'Contact', primaryColumnName:'fullname', columns: {
                         id: { columnName: 'id', columnLabel: 'ContactId', columnType: 'number' },
-                        fullname: { columnName: 'fullname', columnLabel: 'First Name', columnType: 'text' },
+                        fullname: { columnName: 'fullname', columnLabel: 'Full Name', columnType: 'text' },
                         firstname: { columnName: 'firstname', columnLabel: 'First Name', columnType: 'text' },
                         lastname: { columnName: 'lastname', columnLabel: 'Last Name', columnType: 'text' },
                     }

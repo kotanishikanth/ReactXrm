@@ -2,6 +2,10 @@ import React from 'react'
 
 import { FormControl, InputGroup, Modal, Table, Button, Row, Col, ListGroup } from 'react-bootstrap'
 import { UseMetadataServices } from '../../contexts/database-context'
+import FormDesigner from '../common/FormDesigner'
+
+import { useLocation, Route, Link } from 'react-router-dom';
+import TablesPage from './tables/TablesPage';
 
 const TableModal = (props: any) => {
     // const { isNewTable, tableName, displayName } = props.data
@@ -51,6 +55,7 @@ const TableModal = (props: any) => {
                     <FormControl
                         placeholder="tablename"
                         name="tableName"
+                        disabled={state.isNewTable === false}
                         aria-label="tablename"
                         aria-describedby="basic-addon1"
                         value={state.tableName}
@@ -178,6 +183,11 @@ const ColumnModal = (props: any) => {
 export const Index = (props: any) => {
 
     const [state, setState] = React.useState({ selectedItem: null });
+    const updateState = (s: any) => {
+        setState((prev: any) => {
+            return { ...prev, s }
+        })
+    }
     const [tableModalState, setTableModalState] = React.useState({
         show: false,
         isNewTable: false,
@@ -209,48 +219,58 @@ export const Index = (props: any) => {
         <Row style={{ height: '100%' }}>
             <Col style={{ backgroundColor: 'white' }} sm={2}>
                 <ListGroup>
-                    <ListGroup.Item>Tables</ListGroup.Item>
+                    <ListGroup.Item><Link to="/settings/tables">Tables</Link></ListGroup.Item>
+                    <ListGroup.Item><Link to="/settings/memory">Memory</Link></ListGroup.Item>
                 </ListGroup>
             </Col>
             <Col sm={10}>
+            <Route exact path="/settings">
+                    <h3>Settings Page</h3>
+                </Route>
+                <Route path="/settings/tables" >
+                   <TablesPage />
+                </Route>
+                <Route exact path="/settings/memory" >
+                   <h3>Memory Page</h3>
+                </Route>
+{/*  
+
                 <h3>Settings Page</h3>
                 <br />
                 <div style={{ alignItems: 'left' }}>
-                    <Button variant="outline-secondary" 
-                    style={{ minWidth: 150 }}
-                    onClick={() => setTableModalState((prev: any) => {
-                        return {
-                            ...prev, isNewTable: true, show: true
-                        }
-                    })}>{ state.selectedItem === null ?  'Add New Table' : 'Update Table' } </Button>{' '}
-                    <Button variant="outline-secondary" 
-                    style={{ minWidth: 150 }}
-                    disabled={state.selectedItem === null}
-                    onClick={() => setColumnsModalState((prev: any) => {
-                        return {
-                            ...prev, show: true
-                        }
-                    })}>Edit Columns</Button>{' '}
-                    <Button variant="outline-secondary" 
-                    style={{ minWidth: 150 }}
-                    disabled={state.selectedItem === null}
-                    onClick={() => setColumnsModalState((prev: any) => {
-                        return {
-                            ...prev, show: true
-                        }
-                    })}>Forms</Button>{' '}
-                    <Button variant="outline-secondary" 
-                    style={{ minWidth: 150 }}
-                    disabled={state.selectedItem === null}
-                    onClick={() => setColumnsModalState((prev: any) => {
-                        return {
-                            ...prev, show: true
-                        }
-                    })}>Views</Button>{' '}
-                    <Button variant="outline-danger" 
-                    style={{ minWidth: 150 }}
-                    disabled={state.selectedItem === null}
-                   >Delete Table</Button>{' '}
+                    <Button variant="outline-secondary"
+                        style={{ minWidth: 150 }}
+                        onClick={() => updateState({ isNewTable: (state.selectedItem === null), show: true })}>
+                        {state.selectedItem === null ? 'Add New Table' : 'Update Table'}
+                    </Button>{' '}
+                    <Button variant="outline-secondary"
+                        style={{ minWidth: 150 }}
+                        disabled={state.selectedItem === null}
+                        onClick={() => setColumnsModalState((prev: any) => {
+                            return {
+                                ...prev, show: true
+                            }
+                        })}>Edit Columns</Button>{' '}
+                    <Button variant="outline-secondary"
+                        style={{ minWidth: 150 }}
+                        disabled={state.selectedItem === null}
+                        onClick={() => setColumnsModalState((prev: any) => {
+                            return {
+                                ...prev, show: true
+                            }
+                        })}>Forms</Button>{' '}
+                    <Button variant="outline-secondary"
+                        style={{ minWidth: 150 }}
+                        disabled={state.selectedItem === null}
+                        onClick={() => setColumnsModalState((prev: any) => {
+                            return {
+                                ...prev, show: true
+                            }
+                        })}>Views</Button>{' '}
+                    <Button variant="outline-danger"
+                        style={{ minWidth: 150 }}
+                        disabled={state.selectedItem === null}
+                    >Delete Table</Button>{' '}
                 </div>
                 <br />
                 <Table bordered hover size="sm">
@@ -263,17 +283,17 @@ export const Index = (props: any) => {
                     </thead>
                     <tbody>
                         {tableList.map((x: any, index: any) => {
-                            return <tr key={x.tableName} 
-                            style={{ background: (state.selectedItem === x.tableName ? "lightgrey" : "") }}
-                            onClick={()=> setState((prev:any) => { return {...prev, selectedItem: (prev.selectedItem === x.tableName ? null : x.tableName)} })}
-                            onDoubleClick={() => setTableModalState((prev: any) => {
-                                return {
-                                    ...prev, isNewTable: false,
-                                    show: true,
-                                    tableName: x.tableName,
-                                    displayName: x.displayName
-                                }
-                            })}>
+                            return <tr key={x.tableName}
+                                style={{ background: (state.selectedItem === x.tableName ? "lightgrey" : "") }}
+                                onClick={() => setState((prev: any) => { return { ...prev, selectedItem: (prev.selectedItem === x.tableName ? null : x.tableName) } })}
+                                onDoubleClick={() => setTableModalState((prev: any) => {
+                                    return {
+                                        ...prev, isNewTable: false,
+                                        show: true,
+                                        tableName: x.tableName,
+                                        displayName: x.displayName
+                                    }
+                                })}>
                                 <td>{index + 1}</td>
                                 <td>{x.tableName}</td>
                                 <td>{x.displayName}</td>
@@ -284,10 +304,19 @@ export const Index = (props: any) => {
                     </tbody>
                 </Table>
 
+                {state.selectedItem === "formslfheiwsfg" || true ?
+                    null
+                    : <FormDesigner tableName={state.selectedItem}></FormDesigner>
+                }
+
+                
+            */}
+
 
             </Col>
         </Row>
 
+{/*
         <TableModal style={{ width: '90%', height: '90%', maxWidth: '100%', maxHeight: '100%' }}
             data={tableModalState}
             show={tableModalState.show}
@@ -301,7 +330,7 @@ export const Index = (props: any) => {
             }}></TableModal>
 
 
-<ColumnModal style={{ width: '90%', height: '90%', maxWidth: '100%', maxHeight: '100%' }}
+        <ColumnModal style={{ width: '90%', height: '90%', maxWidth: '100%', maxHeight: '100%' }}
             data={columnsModalState}
             show={columnsModalState.show}
             onSubmit={onTableModalSubmitHandler}
@@ -312,7 +341,12 @@ export const Index = (props: any) => {
                     }
                 })
             }}></ColumnModal>
+
+            */}
+
     </React.Fragment>)
+
+
 }
 
 export default Index
