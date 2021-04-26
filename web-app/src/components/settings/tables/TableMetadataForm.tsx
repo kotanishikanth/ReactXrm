@@ -1,12 +1,12 @@
 import React from 'react'
 
-import { useLocation, useHistory, Route, Link } from 'react-router-dom';
+import { useLocation, useHistory, Route, Link, useRouteMatch, useParams } from 'react-router-dom';
 
-import { Tabs, Tab, Form, FormControl, InputGroup, Modal, Table, Button, Row, Col, ListGroup } from 'react-bootstrap'
-import { TableMetadataType, UseMetadataServices } from '../../../contexts/database-context';
+import { Tabs, Tab, Form, FormControl, InputGroup, Modal, Table, Button, Row, Col, ListGroup, ListGroupItem } from 'react-bootstrap'
+import { ColumnMetadataType, TableMetadataType, UseMetadataServices } from '../../../contexts/database-context';
 
 
-type TableFormStateType = {
+type TableMetadataFormStateType = {
     table: TableMetadataType,
     isModified: boolean,
     isNewTable: boolean
@@ -14,12 +14,14 @@ type TableFormStateType = {
 
 const EmptyTableMetadataType = { tableName: '', displayName: '', primaryColumnName: '', columns: {} }
 
-export const TableForm = (props: any) => {
+export const TableMetadataForm = (props: any) => {
     const history = useHistory();
     const url = useLocation().pathname;
     const urlPrefix = '/settings/tables/'
 
-    const [state, setState] = React.useState<TableFormStateType>({
+    console.log('TableMetadataForm:', useRouteMatch(), useParams());
+
+    const [state, setState] = React.useState<TableMetadataFormStateType>({
         table: EmptyTableMetadataType,
         isModified: false,
         isNewTable: props.isNewTable
@@ -27,7 +29,7 @@ export const TableForm = (props: any) => {
     const appendState = (s: any) => {
         setState((prev: any): any => { return { ...prev, ...s } })
     }
-    const [tab, setTab] = React.useState<string|null>('main');
+    const [tab, setTab] = React.useState<string | null>('main');
 
     const { AddNewTable, UpdateTable, GetTableList, GetTable } = UseMetadataServices()
 
@@ -49,7 +51,7 @@ export const TableForm = (props: any) => {
     }
 
     const onInputChangeHandler = (e: any) => {
-        setState((prev: TableFormStateType): TableFormStateType => {
+        setState((prev: TableMetadataFormStateType): TableMetadataFormStateType => {
             return {
                 ...prev, table: { ...prev.table, [e.target['name']]: e.target['value'] }, isModified: true
             }
@@ -57,7 +59,7 @@ export const TableForm = (props: any) => {
     }
 
     React.useEffect(() => {
-        setState((prev: TableFormStateType): TableFormStateType => {
+        setState((prev: TableMetadataFormStateType): TableMetadataFormStateType => {
             var table: TableMetadataType = EmptyTableMetadataType;
             if (!props.isNewTable && prev.table.tableName !== props.tableName) {
                 table = GetTable(props.tableName)
@@ -67,6 +69,7 @@ export const TableForm = (props: any) => {
     }, [props])
 
     return (<React.Fragment>
+        
         <div style={{ alignItems: 'left' }}>
             <Button variant={props.isNewTable ? "outline-primary" : "outline-secondary"}
                 disabled={!state.isModified}
@@ -76,13 +79,11 @@ export const TableForm = (props: any) => {
         </div>
         <br />
 
-        <h5>
-            {props.isNewTable ? 'Create New Table' : 'Edit ' + state.table.displayName + ' table'}
-        </h5>
+        
         <Tabs
             id="controlled-tab-example"
             activeKey={tab}
-            onSelect={(k:string|null) => setTab(k)}
+            onSelect={(k: string | null) => setTab(k)}
         >
             <Tab eventKey="main" title="Main">
                 <Form>
@@ -116,8 +117,19 @@ export const TableForm = (props: any) => {
                     </InputGroup>
                 </Form>
             </Tab>
-            <Tab eventKey="columns" title="Columns">
-                <h5>Columns</h5>
+            <Tab eventKey="columns" title="Columns" disabled={state.isNewTable}>
+                <div style={{ alignItems: 'left' }}>
+                    <Button variant={props ? "outline-primary" : "outline-secondary"}
+                    >{props ? 'Add New Column' : 'Update table'}</Button>{' '}
+                </div>
+                <br />
+                {
+                    Object.values(state.table.columns).map((column: ColumnMetadataType) => {
+                        return (
+                            <ListGroupItem key={column.columnName}>{column.columnLabel} </ListGroupItem>
+                        )
+                    })
+                }
             </Tab>
             <Tab eventKey="forms" title="Forms">
                 <h5>Forms</h5>
@@ -129,4 +141,4 @@ export const TableForm = (props: any) => {
     </React.Fragment>)
 }
 
-export default TableForm
+export default TableMetadataForm

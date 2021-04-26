@@ -1,6 +1,6 @@
 import React from "react";
 
-type ColumnMetadataType = {
+export type ColumnMetadataType = {
     columnName: string
     columnLabel: string
     columnType: 'text' | 'number' | 'lookup' | 'datetime'
@@ -32,6 +32,35 @@ type DatabaseContextStateType = {
     data: any
 }
 
+const EmptyDatabaseContextStateType:DatabaseContextStateType = {
+    metadata: { tables: {}, forms: [], views:[] },
+    data: []
+}
+
+const PredefinedDatabaseContextStateType: DatabaseContextStateType = {
+    metadata: {
+        tables: {
+            'account': {
+                tableName: 'account', displayName: 'Account', primaryColumnName:'name', columns: {
+                    id: { columnName: 'id', columnLabel: 'AccountId', columnType: 'number' },
+                    name: { columnName: 'name', columnLabel: 'Account Name', columnType: 'text' },
+                }
+            },
+            'contact': {
+                tableName: 'contact', displayName: 'Contact', primaryColumnName:'fullname', columns: {
+                    id: { columnName: 'id', columnLabel: 'ContactId', columnType: 'number' },
+                    fullname: { columnName: 'fullname', columnLabel: 'Full Name', columnType: 'text' },
+                    firstname: { columnName: 'firstname', columnLabel: 'First Name', columnType: 'text' },
+                    lastname: { columnName: 'lastname', columnLabel: 'Last Name', columnType: 'text' },
+                }
+            }
+        },
+        forms: [],
+        views: []
+    },
+    data: {}
+}
+
 type DatabaseContextType = {
     state: DatabaseContextStateType,
     setState: (state: DatabaseContextStateType | ((prev: any) => DatabaseContextStateType)) => void;
@@ -39,10 +68,7 @@ type DatabaseContextType = {
 
 const DatabaseContext = React.createContext<DatabaseContextType>({
 
-    state: {
-        metadata: { tables: {}, forms: [], views:[] },
-        data: []
-    },
+    state: EmptyDatabaseContextStateType,
     setState: state => console.warn('setState prototype method')
 })
 
@@ -209,29 +235,7 @@ export const UseMetadataServices = () => {
 
 
 const DatabaseContextProvider = ((props?: any) => {
-    const [state, setState] = React.useState<DatabaseContextStateType>({
-        metadata: {
-            tables: {
-                'account': {
-                    tableName: 'account', displayName: 'Account', primaryColumnName:'name', columns: {
-                        id: { columnName: 'id', columnLabel: 'AccountId', columnType: 'number' },
-                        name: { columnName: 'name', columnLabel: 'Account Name', columnType: 'text' },
-                    }
-                },
-                'contact': {
-                    tableName: 'contact', displayName: 'Contact', primaryColumnName:'fullname', columns: {
-                        id: { columnName: 'id', columnLabel: 'ContactId', columnType: 'number' },
-                        fullname: { columnName: 'fullname', columnLabel: 'Full Name', columnType: 'text' },
-                        firstname: { columnName: 'firstname', columnLabel: 'First Name', columnType: 'text' },
-                        lastname: { columnName: 'lastname', columnLabel: 'Last Name', columnType: 'text' },
-                    }
-                }
-            },
-            forms: [],
-            views: []
-        },
-        data: {}
-    });
+    const [state, setState] = React.useState<DatabaseContextStateType>(PredefinedDatabaseContextStateType);
 
     return (
         <DatabaseContext.Provider value={{ state, setState }}>
@@ -241,5 +245,31 @@ const DatabaseContextProvider = ((props?: any) => {
 })
 
 export const UseDatabaseContext = () => React.useContext(DatabaseContext);
+
+export const UseDatabaseCacheMethods = () => {
+    const { state, setState } = React.useContext(DatabaseContext);
+
+    const SetCache = () => {
+        var jsonString = JSON.stringify( state.metadata);
+        localStorage.setItem('METADATA', jsonString);
+    }
+
+    const GetCache = () => {
+        var jsonString:string = localStorage.getItem('METADATA')|| JSON.stringify( PredefinedDatabaseContextStateType);
+        var metadata = JSON.parse(jsonString);
+        setState( {metadata, data:[]} );
+    }
+
+    const ClearCache = () => {
+        localStorage.removeItem('METADATA');
+        setState( PredefinedDatabaseContextStateType );
+    }
+
+    return {
+        SetCache,
+        GetCache,
+        ClearCache
+    }
+}
 
 export default DatabaseContextProvider

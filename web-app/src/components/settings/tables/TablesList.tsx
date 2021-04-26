@@ -5,7 +5,7 @@ import { useLocation, useHistory , Route, Link } from 'react-router-dom';
 import { FormControl, InputGroup, Modal, Table, Button, Row, Col, ListGroup } from 'react-bootstrap'
 import { UseMetadataServices } from '../../../contexts/database-context';
 
-export const TableView = (props: any) => {
+export const TablesList = (props: any) => {
     const history = useHistory();
     const url = useLocation().pathname;
     const urlPrefix = '/settings/tables/'
@@ -58,4 +58,4 @@ export const TableView = (props: any) => {
     </React.Fragment>)
 }
 
-export default TableView
+export default TablesList

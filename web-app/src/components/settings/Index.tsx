@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { FormControl, InputGroup, Modal, Table, Button, Row, Col, ListGroup } from 'react-bootstrap'
-import { UseMetadataServices } from '../../contexts/database-context'
+import { FormControl, InputGroup, Modal, Table, Button, Row, Col, ListGroup, ListGroupItem } from 'react-bootstrap'
+import { UseDatabaseCacheMethods, UseMetadataServices } from '../../contexts/database-context'
 import FormDesigner from '../common/FormDesigner'
 
 import { useLocation, Route, Link } from 'react-router-dom';
@@ -200,6 +200,8 @@ export const Index = (props: any) => {
     const { AddNewTable, GetTableList } = UseMetadataServices()
     const tableList = GetTableList()
 
+    const { SetCache, GetCache, ClearCache } = UseDatabaseCacheMethods();
+
     const onTableModalSubmitHandler = (data: any) => {
         setTableModalState((prev: any) => {
             return {
@@ -232,6 +234,11 @@ export const Index = (props: any) => {
                 </Route>
                 <Route exact path="/settings/memory" >
                    <h3>Memory Page</h3>
+                   <ListGroup>
+                       <ListGroupItem onClick={SetCache}>Save Metadata</ListGroupItem>
+                       <ListGroupItem onClick={GetCache}>Restore Metadata</ListGroupItem>
+                       <ListGroupItem onClick={ClearCache}>Clear Metadata</ListGroupItem>
+                   </ListGroup>
                 </Route>
 {/*  
 
