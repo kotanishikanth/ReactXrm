@@ -3,17 +3,33 @@ import React from 'react'
 
 import { Tabs, Tab, Form, FormControl, InputGroup, Modal, Table, Button, Row, Col, ListGroup, ListGroupItem } from 'react-bootstrap'
 
-export type MenuBarItem = {
+
+export type MenuBarItemType = {
     name?: string
     label: string
+    front?:boolean
+    hidden?: boolean
     disabled?: boolean
     onClick?: any
-    style?: "primary" | "secondary" | "success" | "warning" | "danger" | "light" | "info" | "dark" | "link"
+    variant?: "primary" | "secondary" | "success" | "warning" | "danger" | "light" | "info" | "dark" | "link"
     onRight?: boolean
 }
 
 export type MenuBarItemCollection = {
-    [key:string]: MenuBarItem
+    [key: string]: MenuBarItemType
+}
+
+export const MenuBarItem = (props: any) => {
+    if(props.hidden === true) return null;
+    return (<React.Fragment>
+    <Button
+        variant={"outline-" + (props.variant || "secondary")}
+        disabled={props.disabled === true}
+        onClick={props.onClick || (() => null)}
+        style={{ float: (props.onRight ? 'right' : 'none') }}
+    >{props.children}
+    </Button>{" "}
+    </React.Fragment>)
 }
 
 export const MenuBar = (props: any) => {
@@ -24,23 +40,8 @@ export const MenuBar = (props: any) => {
 
     React.useEffect(() => {
 
-        var buttons:any = {}
-        Object.entries(props.items).forEach((item: any) => {
-            
-            var name = item[0];
-            var _item = {
-                name,
-                label: item[1].label,
-                disabled: item[1].disabled === true,
-                onClick: item[1].onClick || (() => null),
-                style: item[1].style || "secondary",
-                onRight: item[1].onRight === true
-            }
-            buttons = { ...buttons, [name.toLowerCase()]: _item };
-        });
-        
         setState((prev: any) => {
-            return { ...prev, buttons }
+            return { ...prev, buttons: props.items }
         })
     }, [props])
 
@@ -48,19 +49,41 @@ export const MenuBar = (props: any) => {
         <br />
         <div style={{ alignItems: 'left' }}>
             {
-                Object.values<MenuBarItem>(state.buttons).map((button: MenuBarItem) => {
-                    return (<React.Fragment key={button.name}>
-                    <Button 
-                        variant={"outline-" + button.style}
-                        disabled={button.disabled}
-                        onClick={button.onClick}
-                        style={{ float: (button.onRight ? 'right' : 'none') }}
-                    >{button.label}
-                    </Button>{" "}
-                    </React.Fragment> )
+                Object.values<MenuBarItemType>(state.buttons).filter((button: MenuBarItemType) => button.onRight !== true && button.front === true).map((button: MenuBarItemType) => {
+                    console.log(button)
+                    return <MenuBarItem 
+                    variant={button.variant}
+                    onClick={button.onClick}
+                    disabled={button.disabled} 
+                    hidden={button.hidden} 
+                    onRight={button.onRight}
+                    style={props.style}>{button.label}</MenuBarItem>
                 })
             }
-
+            {props.children}
+            {
+                Object.values<MenuBarItemType>(state.buttons).filter((button: MenuBarItemType) => button.onRight !== true && button.front !== true).map((button: MenuBarItemType) => {
+                    console.log(button)
+                    return <MenuBarItem 
+                    variant={button.variant}
+                    onClick={button.onClick}
+                    disabled={button.disabled} 
+                    hidden={button.hidden} 
+                    onRight={button.onRight}
+                    style={props.style}>{button.label}</MenuBarItem>
+                })
+            }
+            {
+                Object.values<MenuBarItemType>(state.buttons).filter((button: MenuBarItemType) => button.onRight === true).map((button: MenuBarItemType, i:number) => {
+                    return <MenuBarItem key={button.name || i}
+                    variant={button.variant}
+                    onClick={button.onClick}
+                    disabled={button.disabled} 
+                    hidden={button.hidden} 
+                    onRight={button.onRight}
+                    style={props.style}>{button.label}</MenuBarItem>
+                })
+            }
         </div>
         <br />
     </React.Fragment>)

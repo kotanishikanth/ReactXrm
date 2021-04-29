@@ -10,6 +10,10 @@ import TableMetadataForm from './TableMetadataForm';
 import TableColumns from './TableColumns';
 import TableColumnForm from './TableColumnForm';
 import { Breadcrumb } from 'react-bootstrap';
+import TableForms from './TableForms';
+import TableViews from './TableViews';
+import TableViewEditor from './TableViewEditor';
+import TableFormEditor from './TableFormEditor';
 
 export const TablesPage = (props: any) => {
     const history = useHistory();
@@ -47,16 +51,16 @@ export const TablesPage = (props: any) => {
                 <TableColumns />
             </Route>
             <Route path={urlPrefix + "/:tableName/forms/:formName"}>
-                <h2>Form displayed here</h2>
+                <TableFormEditor></TableFormEditor>
             </Route>
             <Route path={urlPrefix + "/:tableName/forms"}>
-                <h2>All forms displayed here</h2>
+                <TableForms></TableForms>
             </Route>
             <Route path={urlPrefix + "/:tableName/views/:ViewName"}>
-                <h2>view displayed here</h2>
+                <TableViewEditor></TableViewEditor>
             </Route>
             <Route path={urlPrefix + "/:tableName/views"}>
-                <h2>All views displayed here</h2>
+                <TableViews></TableViews>
             </Route>
             <Route path={urlPrefix + "/:tableName"}>
                 <TableMetadataForm />

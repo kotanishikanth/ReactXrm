@@ -8,7 +8,7 @@ import {
 import { UseMetadataServices } from '../../../contexts/database-context';
 import MenuBar, { MenuBarItem } from '../../common/MenuBar';
 
-export const TableForms = (props: any) => {
+export const TableViews = (props: any) => {
 
     const history = useHistory();
     const urlPrefix = '/settings/tables/'
@@ -32,17 +32,17 @@ export const TableForms = (props: any) => {
     }, [props])
 
     return (<React.Fragment>
-         <MenuBar items={state.menuBarButtons} >
+        <MenuBar items={state.menuBarButtons} >
             <MenuBarItem
                 variant="primary"
                 onClick={() => {
-                    history.push(urlPrefix + tableName + "/forms/new-form")
-                }}>Add Form</MenuBarItem>
+                    history.push(urlPrefix + tableName + "/views/new-view")
+                }}>Add View</MenuBarItem>
 
             <MenuBarItem
                 disabled={state.selectedItem == null}
                 onClick={() => {
-                    history.push(urlPrefix + tableName + "/forms/" + state.selectedItem)
+                    history.push(urlPrefix + tableName + "/views/" + state.selectedItem)
                 }}>Modify</MenuBarItem>
 
             <MenuBarItem
@@ -53,4 +53,4 @@ export const TableForms = (props: any) => {
     </React.Fragment>)
 }
 
-export default TableForms
+export default TableViews

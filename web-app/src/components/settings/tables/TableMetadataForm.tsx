@@ -4,7 +4,7 @@ import { useLocation, useHistory, Route, Link, useRouteMatch, useParams } from '
 
 import { Tabs, Tab, Form, FormControl, InputGroup, Modal, Table, Button, Row, Col, ListGroup, ListGroupItem } from 'react-bootstrap'
 import { ColumnMetadataType, EmptyTableMetadataType, TableMetadataType, UseMetadataServices } from '../../../contexts/database-context';
-import MenuBar, { MenuBarItem, MenuBarItemCollection } from '../../common/MenuBar';
+import MenuBar, { MenuBarItemType, MenuBarItemCollection, MenuBarItem } from '../../common/MenuBar';
 
 
 type TableMetadataFormStateType = {
@@ -32,91 +32,74 @@ export const TableMetadataForm = (props: any) => {
         table: EmptyTableMetadataType,
         isModified: false,
         isNewTable: tableName === 'new-table',
-        menuBarButtons: {}
+        menuBarButtons: {
+            "close": {
+                label: 'Close',
+                onClick: () => history.push(urlPrefix),
+                onRight: true
+            }
+        }
     })
 
     const appendState = (s: any) => {
         setState((prev: any): any => { return { ...prev, ...s } })
     }
 
-
-    const createOrUpdateTableHandler = () => {
-        appendState({ isModified: false })  // setState((prev: any):any => { return { ...prev, isModified:false } })
-        
-
-        if (state.isNewTable && tableList.map(x => x.tableName).includes(state.table.tableName)) {
-            appendState({ isModified: true })
-            alert('TableAlreadyExists')
-        } else if (state.isNewTable) {
-            var newTable = { tableName: state.table.tableName, displayName: state.table.displayName }
-            debugger;
-            AddNewTable(newTable)
-            history.push(urlPrefix + state.table.tableName)
-        }
-        else if (!state.isNewTable) {
-            UpdateTable({ tableName: state.table.tableName, displayName: state.table.displayName })
-            history.push(urlPrefix + state.table.tableName)
-        }
-    }
-
-    var menuBarButtons: MenuBarItemCollection = {
-        "createupdate": {
-            label: (isNewTable ? 'Create Table' : 'Update table'),
-            onClick: createOrUpdateTableHandler,
-            style: isNewTable ? "primary" : "secondary",
-            disabled: state.isModified
-        },
-        "columns": {
-            label: 'Columns',
-            onClick: () => history.push(urlPrefix + tableName + '/columns'),
-            style: "secondary",
-            disabled: isNewTable
-        },
-        "forms": {
-            label: 'Forms',
-            onClick: () => history.push(urlPrefix + tableName + '/forms'),
-            style: "secondary",
-            disabled: isNewTable
-        },
-        "views": {
-            label: 'Views',
-            onClick: () => history.push(urlPrefix + tableName + '/views'),
-            style: "secondary",
-            disabled: isNewTable
-        },
-        "close": {
-            label: 'Close',
-            onClick: () => history.push(urlPrefix),
-            onRight: true
-        }
-    }
-
-
     const onInputChangeHandler = (e: any) => {
         const { name, value } = e.target
         setState((prev: TableMetadataFormStateType): TableMetadataFormStateType => {
+            var table = { ...prev.table, [name]: value }
             return {
-                ...prev, table: { ...prev.table, [name]: value }, isModified: true
+                ...prev, table, isModified: true,
             }
         })
     }
 
     React.useEffect(() => {
-        setState((prev:any)=>{
+        var isNewTable = tableName === 'new-table'
+
+        setState((prev: any) => {
             return {
                 ...prev,
-                menuBarButtons
+                table: isNewTable ? EmptyTableMetadataType : GetTable(tableName),
+                isNewTable: isNewTable,
             }
         })
-    }, [])
-
-
-
+    }, [tableName])
 
 
     return (<React.Fragment>
 
-        <MenuBar items={state.menuBarButtons} />
+        <MenuBar items={state.menuBarButtons} >
+            <MenuBarItem
+                variant="primary"
+                hidden={!state.isNewTable}
+                disabled={!state.isModified}
+                onClick={() => {
+                    AddNewTable(state.table)
+                    history.push(urlPrefix + state.table.tableName)
+                }}>Create</MenuBarItem>
+
+            <MenuBarItem
+                hidden={state.isNewTable}
+                disabled={!state.isModified}
+                onClick={() => {
+                    UpdateTable(state.table)
+                    history.push(urlPrefix + state.table.tableName)
+                }}>Update</MenuBarItem>
+
+            <MenuBarItem
+                disabled={state.isNewTable}
+                onClick={() => history.push(urlPrefix + tableName + '/columns')}>Columns</MenuBarItem>
+
+            <MenuBarItem
+                disabled={state.isNewTable}
+                onClick={() => history.push(urlPrefix + tableName + '/forms')}>Forms</MenuBarItem>
+
+            <MenuBarItem
+                disabled={state.isNewTable}
+                onClick={() => history.push(urlPrefix + tableName + '/views')}>Views</MenuBarItem>
+        </MenuBar>
 
         <Form>
             <InputGroup className="mb-3">

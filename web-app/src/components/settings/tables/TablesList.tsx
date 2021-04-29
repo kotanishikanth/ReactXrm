@@ -4,7 +4,7 @@ import React from 'react'
 import { useLocation, useHistory, Route, Link } from 'react-router-dom';
 import { FormControl, InputGroup, Modal, Table, Button, Row, Col, ListGroup } from 'react-bootstrap'
 import { UseMetadataServices } from '../../../contexts/database-context';
-import { MenuBar, MenuBarItem, MenuBarItemCollection } from '../../common/MenuBar';
+import { MenuBar, MenuBarItemType, MenuBarItemCollection, MenuBarItem } from '../../common/MenuBar';
 
 export const TablesList = (props: any) => {
     const history = useHistory();
@@ -21,17 +21,6 @@ export const TablesList = (props: any) => {
 
     const BuildMenuBarItems = (selectedItem: string = '', isItemSelected: boolean = false) => {
         var menuBarButtons: MenuBarItemCollection = {
-            "create": {
-                label: 'Create New Table',
-                onClick: () => history.push(urlPrefix + 'new-table'),
-                style: "secondary",
-            },
-            "edit": {
-                label: 'Edit Table',
-                disabled: !isItemSelected,
-                onClick: () => history.push(urlPrefix + (selectedItem || state.selectedItem)),
-                style: "secondary",
-            }
         }
         return menuBarButtons
     }
@@ -41,10 +30,6 @@ export const TablesList = (props: any) => {
             return {
                 ...prev,
                 selectedItem: (prev.selectedItem === tableName ? null : tableName),
-                menuBarButtons: {
-                    ...prev.menuBarButtons,
-                    edit: { ...prev.menuBarButtons.edit, onClick: () => history.push(urlPrefix + (tableName)), disabled: (prev.selectedItem === tableName)  }
-                }
             }
         })
     }
@@ -59,7 +44,27 @@ export const TablesList = (props: any) => {
 
     return (<React.Fragment>
 
-        <MenuBar items={state.menuBarButtons} />
+        <MenuBar items={state.menuBarButtons} >
+            <MenuBarItem
+                variant="primary"
+                onClick={() => {
+                    history.push(urlPrefix + "/new-table")
+                }}>Create new Table</MenuBarItem>
+
+            <MenuBarItem
+                disabled={state.selectedItem == null}
+                onClick={() => {
+                    history.push(urlPrefix + state.selectedItem)
+                }}>Update Table</MenuBarItem>
+
+            <MenuBarItem
+                disabled={state.selectedItem == null}
+                onClick={() => null}>Truncate</MenuBarItem>
+
+            <MenuBarItem
+                disabled={state.selectedItem == null}
+                onClick={() => null}>Delete</MenuBarItem>
+        </MenuBar>
 
         <Table bordered hover size="sm">
             <thead>

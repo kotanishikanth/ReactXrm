@@ -9,50 +9,45 @@ import { ColumnMetadataType, EmptyColumnMetadataType, UseMetadataServices } from
 import MenuBar, { MenuBarItem, MenuBarItemCollection } from '../../common/MenuBar';
 
 
-type TableColumnFormStateType = {
-    column: ColumnMetadataType,
+type TableFormEditorStateType = {
     isModified: boolean,
     isNewColumn: boolean,
     menuBarButtons: MenuBarItemCollection
 
 }
 
-export const TableColumnForm = (props: any) => {
+export const TableFormEditor = (props: any) => {
 
     const history = useHistory();
     const urlPrefix = '/settings/tables/'
     const { tableName, columnName } = (useParams() as any)
-    const { GetColumn, UpsertColumn, GetColumnList, GetTableList } = UseMetadataServices();
+    const { GetColumn, GetColumnList, GetTableList } = UseMetadataServices();
     const tableList = GetTableList();
 
-    const [state, setState] = React.useState<TableColumnFormStateType>({
-        isNewColumn: columnName === 'new-column',
+    const [state, setState] = React.useState<TableFormEditorStateType>({
+        isNewColumn: columnName === 'new-form',
         menuBarButtons: {
             "close": {
                 label: 'Close',
-                onClick: () => history.push(urlPrefix + tableName + "/columns"),
+                onClick: () => history.push(urlPrefix + tableName + "/forms"),
                 onRight: true
             }
         },
         isModified: false,
-        column: EmptyColumnMetadataType
     })
 
     const onInputChangeHandler = (e: any) => {
         const { name, value } = e.target
-        setState((prev: TableColumnFormStateType): TableColumnFormStateType => {
+        setState((prev: TableFormEditorStateType): TableFormEditorStateType => {
             return {
-                ...prev, column: {
-                    ...prev.column,
-                    [name]: value
-                },
+                ...prev,
                 isModified: true
             }
         })
     }
 
     React.useEffect(() => {
-        var isNewColumn = columnName === 'new-column'
+        var isNewColumn = columnName === 'new-form'
         if (isNewColumn) {
             setState((prev: any) => {
                 return { ...prev, column:EmptyColumnMetadataType, isNewColumn }
@@ -72,16 +67,12 @@ export const TableColumnForm = (props: any) => {
                 hidden={!state.isNewColumn}
                 disabled={!state.isModified}
                 onClick={() => {
-                    UpsertColumn(tableName, state.column)
-                    history.push(urlPrefix + tableName + "/columns/" + state.column.columnName)
-                }}>Add</MenuBarItem>
+                }}>Add View</MenuBarItem>
 
             <MenuBarItem
                 hidden={state.isNewColumn}
                 disabled={!state.isModified}
                 onClick={() => {
-                    UpsertColumn(tableName, state.column)
-                    history.push(urlPrefix + tableName + "/columns/" + state.column.columnName)
                 }}>Update</MenuBarItem>
 
             <MenuBarItem
@@ -99,7 +90,6 @@ export const TableColumnForm = (props: any) => {
                     disabled={state.isNewColumn === false}
                     aria-label="tablename"
                     aria-describedby="basic-addon1"
-                    value={state.column.columnName}
                     onChange={onInputChangeHandler}
                 ></FormControl>
             </InputGroup>
@@ -112,7 +102,6 @@ export const TableColumnForm = (props: any) => {
                     name="columnLabel"
                     aria-label="columnLabel"
                     aria-describedby="basic-addon1"
-                    value={state.column.columnLabel}
                     onChange={onInputChangeHandler}
                 />
             </InputGroup>
@@ -123,7 +112,6 @@ export const TableColumnForm = (props: any) => {
                 </InputGroup.Prepend>
                 <Form.Control as="select" custom
                     name="columnType"
-                    value={state.column.columnType}
                     onChange={onInputChangeHandler}
                 >
                     <option value="text">Text</option>
@@ -133,29 +121,10 @@ export const TableColumnForm = (props: any) => {
                 </Form.Control>
             </InputGroup>
 
-            {
-                state.column.columnType === 'lookup' ?
-                    <InputGroup className="mb-3">
-                        <InputGroup.Prepend>
-                            <InputGroup.Text id="basic-addon1">Lookup To</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <Form.Control as="select" custom
-                            name="tableRef"
-                            disabled={!state.isNewColumn}
-                            value={state.column.tableRef}
-                            onChange={onInputChangeHandler}
-                        >
-                            {tableList.map((item: any) => {
-                                return <option key={item.tableName} value={item.tableName}>{item.displayName}</option>
-                            })}
-
-                        </Form.Control>
-                    </InputGroup> : null
-            }
 
         </Form>
 
     </React.Fragment>)
 }
 
-export default TableColumnForm
+export default TableFormEditor

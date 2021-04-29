@@ -6,7 +6,7 @@ import {
     useParams
 } from 'react-router-dom';
 import { UseMetadataServices } from '../../../contexts/database-context';
-import MenuBar from '../../common/MenuBar';
+import MenuBar, { MenuBarItem } from '../../common/MenuBar';
 
 export const TableColumns = (props: any) => {
 
@@ -20,21 +20,6 @@ export const TableColumns = (props: any) => {
         columns: [],
         relatedTables: GetRelatedTables(tableName),
         menuBarButtons: {
-            "add": {
-                label: 'Add',
-                onClick: () => history.push(urlPrefix + tableName + "/columns/new-column")
-
-            },
-            "edit": {
-                label: 'Edit',
-                onClick: () => history.push(urlPrefix + tableName + "/columns/" + state.selectedItem)
-
-            },
-            "delete": {
-                label: 'Delete',
-                onClick: () => null
-
-            },
             "close": {
                 label: 'Close',
                 onClick: () => history.push(urlPrefix + tableName),
@@ -48,10 +33,6 @@ export const TableColumns = (props: any) => {
             return {
                 ...prev,
                 selectedItem: (prev.selectedItem === columnName ? null : columnName),
-                menuBarButtons: {
-                    ...prev.menuBarButtons,
-                    edit: { ...prev.menuBarButtons.edit, onClick: () => history.push(urlPrefix + tableName + "/columns/" + columnName), disabled: (prev.selectedItem === columnName) }
-                }
             }
         })
     }
@@ -64,7 +45,23 @@ export const TableColumns = (props: any) => {
     }, [])
 
     return (<React.Fragment>
-        <MenuBar items={state.menuBarButtons} />
+        <MenuBar items={state.menuBarButtons} >
+            <MenuBarItem
+                variant="primary"
+                onClick={() => {
+                    history.push(urlPrefix + tableName + "/columns/new-column")
+                }}>Add</MenuBarItem>
+
+            <MenuBarItem
+                disabled={state.selectedItem == null}
+                onClick={() => {
+                    history.push(urlPrefix + tableName + "/columns/" + state.selectedItem)
+                }}>Update</MenuBarItem>
+
+            <MenuBarItem
+                disabled={state.selectedItem == null}
+                onClick={() => null}>Delete</MenuBarItem>
+        </MenuBar>
 
         <Table bordered hover size="sm">
             <thead>
@@ -97,7 +94,7 @@ export const TableColumns = (props: any) => {
             </tbody>
         </Table>
 
-        <br/>
+        <br />
         <Table bordered hover size="sm">
             <thead>
                 <tr>
