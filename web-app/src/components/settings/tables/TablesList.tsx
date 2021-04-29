@@ -1,9 +1,10 @@
 import React from 'react'
 
 
-import { useLocation, useHistory , Route, Link } from 'react-router-dom';
+import { useLocation, useHistory, Route, Link } from 'react-router-dom';
 import { FormControl, InputGroup, Modal, Table, Button, Row, Col, ListGroup } from 'react-bootstrap'
 import { UseMetadataServices } from '../../../contexts/database-context';
+import { MenuBar, MenuBarItem, MenuBarItemCollection } from '../../common/MenuBar';
 
 export const TablesList = (props: any) => {
     const history = useHistory();
@@ -14,22 +15,51 @@ export const TablesList = (props: any) => {
     const tableList = GetTableList()
 
     const [state, setState] = React.useState<any>({
-        selectedItem: null
+        selectedItem: null,
+        menuBarButtons: {}
     })
 
-    React.useEffect(() => {
+    const BuildMenuBarItems = (selectedItem: string = '', isItemSelected: boolean = false) => {
+        var menuBarButtons: MenuBarItemCollection = {
+            "create": {
+                label: 'Create New Table',
+                onClick: () => history.push(urlPrefix + 'new-table'),
+                style: "secondary",
+            },
+            "edit": {
+                label: 'Edit Table',
+                disabled: !isItemSelected,
+                onClick: () => history.push(urlPrefix + (selectedItem || state.selectedItem)),
+                style: "secondary",
+            }
+        }
+        return menuBarButtons
+    }
+
+    const tableClicked = (tableName: string) => {
         setState((prev: any) => {
-            return { ...prev }
+            return {
+                ...prev,
+                selectedItem: (prev.selectedItem === tableName ? null : tableName),
+                menuBarButtons: {
+                    ...prev.menuBarButtons,
+                    edit: { ...prev.menuBarButtons.edit, onClick: () => history.push(urlPrefix + (tableName)), disabled: (prev.selectedItem === tableName)  }
+                }
+            }
         })
-    }, [props])
+    }
+
+
+    React.useEffect(() => {
+        var menuBarButtons = BuildMenuBarItems()
+        setState((prev: any) => {
+            return { ...prev, menuBarButtons }
+        })
+    }, [])
 
     return (<React.Fragment>
-        <div style={{ alignItems: 'left' }}>
-            <Button variant="outline-secondary" onClick={() => history.push(urlPrefix + 'new-table')}>Create New Table</Button>{' '}
-            <Button variant="outline-secondary" disabled={state.selectedItem === null} onClick={() => history.push(urlPrefix + state.selectedItem)}>Edit Table</Button>{' '}
-            
-        </div>
-        <br />
+
+        <MenuBar items={state.menuBarButtons} />
 
         <Table bordered hover size="sm">
             <thead>
@@ -43,8 +73,8 @@ export const TablesList = (props: any) => {
                 {tableList.map((x: any, index: any) => {
                     return <tr key={x.tableName}
                         style={{ background: (state.selectedItem === x.tableName ? "lightgrey" : "") }}
-                        onClick={() => setState((prev: any) => { return { ...prev, selectedItem: (prev.selectedItem === x.tableName ? null : x.tableName) } })}
-                        >
+                        onClick={() => tableClicked(x.tableName)}
+                    >
                         <td>{index + 1}</td>
                         <td>{x.tableName}</td>
                         <td>{x.displayName}</td>

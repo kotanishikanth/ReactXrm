@@ -1,15 +1,20 @@
 import React from 'react'
 
-import { useLocation, useHistory, Route, Link, useRouteMatch,
-    useParams } from 'react-router-dom';
-import { Row, Col, ListGroup, Button } from 'react-bootstrap'
+import {
+    useLocation, useHistory, Route, Link, useRouteMatch,
+    useParams,
+    Switch
+} from 'react-router-dom';
 import TablesList from './TablesList';
 import TableMetadataForm from './TableMetadataForm';
+import TableColumns from './TableColumns';
+import TableColumnForm from './TableColumnForm';
+import { Breadcrumb } from 'react-bootstrap';
 
 export const TablesPage = (props: any) => {
     const history = useHistory();
     const url = useLocation().pathname;
-    const urlPrefix = '/settings/tables'
+    const urlPrefix = '/settings/tables' // useRouteMatch
 
     console.log('TablePage:', useRouteMatch(), useParams());
 
@@ -21,52 +26,47 @@ export const TablesPage = (props: any) => {
     })
 
     React.useEffect(() => {
-        var _url: string | string[] = url;
-        if (url.startsWith('/'))
-            _url = url.substring(1)
-        _url = _url.split('/')
 
-        var tableName = _url[2]
-        var section = _url[3];
-        var sectionItem = _url[4];
-        var title = 'All Tables'
-        // console.log(url, tableName, section, sectionItem)
-
-        if (tableName === '') {
-            title = 'All Tables'
-        } else if (tableName == 'new-table') {
-            title = 'Create New Table'
-        }
-        else {
-            title = 'Edit ' + tableName + ' table'
-        }
-        setState((prev: any) => {
-            return { ...prev, tableName, title, section, sectionItem }
-        })
     }, [url])
 
+    var subUrl:string = '/#/settings'
     return (<React.Fragment>
-        <h5>
-            {state.title}
-        </h5>
-        <br />
-        <Route exact path={urlPrefix}>
-            <TablesList />
-        </Route>
-        <Route path={urlPrefix + "/:tableName"} component={() => {
+        <Breadcrumb>
+        {
+            url.replace('/settings/','').split('/').map((x:string, i:number)=>{
+                subUrl += '/'+ x;
+                return <Breadcrumb.Item href={subUrl} key={i}>{x}</Breadcrumb.Item>
+            })
+        }            
+        </Breadcrumb>
+        <Switch>
+            <Route path={urlPrefix + "/:tableName/columns/:columnName"}>
+                <TableColumnForm />
+            </Route>
+            <Route path={urlPrefix + "/:tableName/columns"}>
+                <TableColumns />
+            </Route>
+            <Route path={urlPrefix + "/:tableName/forms/:formName"}>
+                <h2>Form displayed here</h2>
+            </Route>
+            <Route path={urlPrefix + "/:tableName/forms"}>
+                <h2>All forms displayed here</h2>
+            </Route>
+            <Route path={urlPrefix + "/:tableName/views/:ViewName"}>
+                <h2>view displayed here</h2>
+            </Route>
+            <Route path={urlPrefix + "/:tableName/views"}>
+                <h2>All views displayed here</h2>
+            </Route>
+            <Route path={urlPrefix + "/:tableName"}>
+                <TableMetadataForm />
+            </Route>
+            <Route exact path={urlPrefix}>
+                <TablesList />
+            </Route>
+        </Switch>
 
-            return (<React.Fragment>
-                <TableMetadataForm 
-                isNewTable={state.tableName === 'new-table'} 
-                tableName={state.tableName}
-                section={state.section}
-                sectionItem={state.sectionItem}
-                ></TableMetadataForm>
-            </React.Fragment>)
-        }} >
-
-        </Route>
-    </React.Fragment>)
+    </React.Fragment >)
 }
 
 export default TablesPage

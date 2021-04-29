@@ -200,7 +200,7 @@ export const Index = (props: any) => {
     const { AddNewTable, GetTableList } = UseMetadataServices()
     const tableList = GetTableList()
 
-    const { SetCache, GetCache, ClearCache } = UseDatabaseCacheMethods();
+    const { SetCache, GetCache, ClearCache, GetMetadataSize, GetDataSize } = UseDatabaseCacheMethods();
 
     const onTableModalSubmitHandler = (data: any) => {
         setTableModalState((prev: any) => {
@@ -234,7 +234,15 @@ export const Index = (props: any) => {
                 </Route>
                 <Route exact path="/settings/memory" >
                    <h3>Memory Page</h3>
-                   <ListGroup>
+                   <div>
+                       Metadata size = {GetMetadataSize()}
+                   </div>
+                   <br/>
+                   <div>
+                      Data size = {GetDataSize()}
+                   </div>
+                   <br/>
+                   <ListGroup style={{maxWidth: 300}}>
                        <ListGroupItem onClick={SetCache}>Save Metadata</ListGroupItem>
                        <ListGroupItem onClick={GetCache}>Restore Metadata</ListGroupItem>
                        <ListGroupItem onClick={ClearCache}>Clear Metadata</ListGroupItem>
